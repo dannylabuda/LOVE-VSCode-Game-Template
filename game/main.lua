@@ -15,39 +15,10 @@ function love.load()
 	Solve = SolveState:run()
 
 	local firsttime = os.clock()
-	--Trie = LetterTrie:runTrie();
-	--print(table_print(Trie))
-
 	trie = NewTrie()
 	trie:Test()
 	print(os.clock()-firsttime .. " seconds to build Trie")
 
-	--in_trie basically equals is valid word 
-	--print(in_trie(Trie,letters("mundane")))
-	--getChildren(Trie,"jum")
-
-
-
-	--testing board
-	--[[
-	TempBoard = Board()
-	TempBoard = TempBoard:update(13)
-	local tempPos = Position()
-	tempPos:new(7,7)
-	TempBoard:SetTile(tempPos, 'f')
-	tempPos:new(8,7)
-	TempBoard:SetTile(tempPos, 'o')
-	tempPos:new(9,7)
-	TempBoard:SetTile(tempPos, 'r')
-	TempBoard:Print()
-	--end board testing
-	]]--
-
-	--TestSolver = Solver()
-
-	--TestSolver = TestSolver:update(trie,TempBoard, {"a","b","c","d"})
-	--print(TestSolver.board)
-	--TestSolver:findAllOptions()
 
 	--sets number of words
 	NumberOfWords = 0
@@ -79,7 +50,7 @@ function love.load()
 	--print(RunningWords[3].letters .. " X: " .. RunningWords[3].rootX .. " Y: " .. RunningWords[3].rootY .. " Orientation: " .. RunningWords[3].orientation)
 
 
-	print(currentGameTiles[7][7].letter)
+	--print(currentGameTiles[7][7].letter)
 	
 end
 

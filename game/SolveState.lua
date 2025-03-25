@@ -61,7 +61,7 @@ function SolveState:after_cross(pos)
 end
 
 function SolveState:legal_move(word, last_pos)
-    print("found a word:", word)
+    --print("found a word:", word)
     local board_if_we_played_that = self.board:Copy()
     local play_pos = last_pos
     local word_idx = #word
@@ -73,8 +73,11 @@ function SolveState:legal_move(word, last_pos)
 	
 	--print(self.boardCount)
 	--self.possibleBoards[self.boardCount] = board_if_we_played_that
-	--self.boardCount = self.boardCount + 1
-	board_if_we_played_that:Print()
+	--self.possibleBoards[self.boardCount] = board_if_we_played_that:Copy()
+	self.boardCount = self.boardCount + 1
+	--board_if_we_played_that:Print()
+	local tempBoard = board_if_we_played_that:Take()
+	table.insert(self.possibleBoards, tempBoard)
 
     --print()
 	--return board_if_we_played_that
@@ -309,27 +312,115 @@ function SolveState:find_all_options()
             end
         end
     end
-	--print(self.possibleBoards[1]:Print())
-	--print(self.possibleBoards[2]:Print())
 	return self
 end
 
--- Usage example
---trie = NewTrie()
---trie:Test()
+function GetRandomRack()
+	local rack = {}
+	for i=1,7 do
+		table.insert(rack, string.char(love.math.random(97, 97 + 25)))
+	end
+	return rack
+end
+
+function SolveState:AddWordToBoard(trie)
+	local tempRack = GetRandomRack()
+	local solver = SolveState:new(trie, self.board, tempRack)
+	for i=1,#tempRack do
+		print(tempRack[i])
+	end
+	solver = solver:find_all_options()
+	--add a random word to the board, update the board
+	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Take()
+	solver.boardCount = 1
+	solver.possibleBoards = {}
+	self.board = solver.board
+	self.board:Print()
+end
+
+
+
+function SolveState:PlayerWordValid(proposedBoard)
+	local isValid = false
+	self = self:find_all_options()
+
+	for i=1, self.boardCount-1 do
+		--self.possibleBoards[i]:Print()
+		if self.possibleBoards[i]:All_Positions() == proposedBoard:All_Positions() then 
+		isValid = true
+		goto continue
+		end
+	end
+
+	::continue::
+	return isValid
+end
+
+
 
 function SolveState:run()
 	TempBoard = Board()
 	TempBoard = TempBoard:update(13)
-	TempBoard:SetTile({7,7}, 'f')
-	TempBoard:SetTile({8,7}, 'o')
+	TempBoard:SetTile({7,7}, 's')
+	TempBoard:SetTile({8,7}, 't')
 	TempBoard:SetTile({9,7}, 'r')
+	TempBoard:SetTile({10,7}, 'a')
+	TempBoard:SetTile({11,7}, 'i')
+	TempBoard:SetTile({12,7}, 'n')
+	TempBoard:SetTile({13,7}, 's')
 
-	local solver = SolveState:new(basic_english(), TempBoard, {"n", "i"})
+	local trie = basic_english()
+
+
+
+
+	local solver = SolveState:new(trie, TempBoard, GetRandomRack())
 	print(solver.board:Print())
-	print()
+	local player = SolveState:new(trie, solver.board, {"s","o","d"})
+
+	local tBoard = player.board:Take()
+	print("player board after take:")
+	player.board:Print()
+	tBoard:SetTile({7,8}, 'o')
+	tBoard:SetTile({7,9}, 'd')
+	print("player board after take:")
+	player.board:Print()
+	print("proposed board after take:")
+	tBoard:Print()
+	print(tostring(player:PlayerWordValid(tBoard)))
+	
+
+	
+
+
+
+
+
+	--solver:AddWordToBoard(trie)
+	--solver:AddWordToBoard(trie)
+	--[[
+	--add a random word to the board, update the board
+	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Take()
+	solver.boardCount = 1
+	solver.possibleBoards = {}
+	solver.board:Print()
+	--start another iteration, add another word
+	solver = SolveState:new(basic_english(), solver.board, GetRandomRack())
 	solver = solver:find_all_options()
-	print(solver.boardCount)
+	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Take()
+	solver.boardCount = 1
+	solver.possibleBoards = {}
+	solver.board:Print()
+	]]--
+
+
+
+
+	for i=1,solver.boardCount-1 do
+		--solver.possibleBoards[i]:Print()
+	end
+	
+
 
 
 	return SolveState

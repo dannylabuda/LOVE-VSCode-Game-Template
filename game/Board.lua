@@ -15,7 +15,7 @@ function Board:update(size)
 	for i=1,size do
 		local row = {}
 		for j=1,size do
-			table.insert(row, "None")
+			table.insert(row, "*")
 		end
 		table.insert(self.tiles,row)
 	end
@@ -70,34 +70,38 @@ end
 function Board:IsEmpty(pos)
 	--print("isempty")
 	--print(pos:Print())
-	return self:InBounds(pos) and self:GetTile(pos) == "None"
+	return self:InBounds(pos) and self:GetTile(pos) == "*"
 end
 
 function Board:IsFilled(pos)
 	--print("isfilled")
 	--print(pos:Print())
-	return self:InBounds(pos) and self:GetTile(pos) ~= "None"
+	return self:InBounds(pos) and self:GetTile(pos) ~= "*"
+end
+
+function Board:Take()
+	local tempBoard = Board()
+	tempBoard.size = self.size
+
+	tempBoard.tiles = {}
+	for i=1,self.size do
+		tempBoard.tiles[i] = {}
+		for j=1, self.size do
+			tempBoard.tiles[i][j] = self.tiles[i][j] -- Copy value
+		end
+	end
+	tempBoard.tiles = self.tiles
+	return tempBoard
 end
 
 function Board:Copy()
-	result = Board()
+	result = Board:new()
 	bSize = self.size
+	--result = Board:update(bSize)
 	result = Board:update(bSize)
 	local positionsTable = self:All_Positions()
 	for i=1,#positionsTable do
 		result:SetTile(positionsTable[i], self:GetTile(positionsTable[i]))
 	end
-	return result
-end
-
-function SampleBoard()
-	local result = Board:New(13)
-	local tempPos = Position()
-	tempPos:New(7,7)
-	result:SetTile(tempPos, 'f')
-	tempPos:New(8,7)
-	result:SetTile(tempPos, 'o')
-	tempPos:New(9,7)
-	result:SetTile(tempPos, 'r')
 	return result
 end
