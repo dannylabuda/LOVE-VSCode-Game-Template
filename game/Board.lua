@@ -13,11 +13,10 @@ function Board:update(size)
 	self.tiles = {}
 
 	for i=1,size do
-		local row = {}
+		self.tiles[i] = {}
 		for j=1,size do
-			table.insert(row, "*")
+			self.tiles[i][j] = "*"
 		end
-		table.insert(self.tiles,row)
 	end
 	return self
 end
@@ -79,6 +78,7 @@ function Board:IsFilled(pos)
 	return self:InBounds(pos) and self:GetTile(pos) ~= "*"
 end
 
+--[[
 function Board:Take()
 	local tempBoard = Board()
 	tempBoard.size = self.size
@@ -93,15 +93,48 @@ function Board:Take()
 	tempBoard.tiles = self.tiles
 	return tempBoard
 end
+]]--
+function Board:Equals(otherBoard)
+
+	-- Quick check: Are we comparing to the same object?
+	if self == otherBoard then
+		print("Comparing the same object")
+		return true
+	end
+	-- Quick size check
+	if self.size ~= otherBoard.size then
+		print("Wrong size!")
+		return false
+	end
+
+-- Compare all tiles
+	print("Comparing tiles...")
+	for i = 1, self.size do
+		for j = 1, self.size do
+			local tile1 = self.tiles[i][j]
+			local tile2 = otherBoard.tiles[i][j]
+			print(string.format("Comparing [%d,%d]: %s vs %s", i, j, tile1, tile2))
+
+			if tile1 ~= tile2 then
+				print(string.format("Mismatch at [%d,%d]: %s vs %s", i, j, tile1, tile2))
+				return false
+			end
+		end
+	end
+
+	-- If all checks passed, boards are identical
+	return true
+end
 
 function Board:Copy()
-	result = Board:new()
-	bSize = self.size
-	--result = Board:update(bSize)
-	result = Board:update(bSize)
-	local positionsTable = self:All_Positions()
-	for i=1,#positionsTable do
-		result:SetTile(positionsTable[i], self:GetTile(positionsTable[i]))
+	local result = Board()
+	result.size = self.size
+	result.tiles = {}
+	for i=1, self.size do
+		result.tiles[i] = {}
+		for j=1, self.size do
+			result.tiles[i][j] = self.tiles[i][j]
+		end
 	end
 	return result
 end

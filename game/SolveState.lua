@@ -76,7 +76,7 @@ function SolveState:legal_move(word, last_pos)
 	--self.possibleBoards[self.boardCount] = board_if_we_played_that:Copy()
 	self.boardCount = self.boardCount + 1
 	--board_if_we_played_that:Print()
-	local tempBoard = board_if_we_played_that:Take()
+	local tempBoard = board_if_we_played_that:Copy()
 	table.insert(self.possibleBoards, tempBoard)
 
     --print()
@@ -312,7 +312,7 @@ function SolveState:find_all_options()
             end
         end
     end
-	return self
+	return self.possibleBoards
 end
 
 function GetRandomRack()
@@ -331,7 +331,7 @@ function SolveState:AddWordToBoard(trie)
 	end
 	solver = solver:find_all_options()
 	--add a random word to the board, update the board
-	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Take()
+	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Copy()
 	solver.boardCount = 1
 	solver.possibleBoards = {}
 	self.board = solver.board
@@ -339,22 +339,107 @@ function SolveState:AddWordToBoard(trie)
 end
 
 
-
+--[[
 function SolveState:PlayerWordValid(proposedBoard)
 	local isValid = false
-	self = self:find_all_options()
+	local tempPossibleBoards = self:find_all_options()
+
+	print("current board:")
+	self.board:Print()
+
+	print("proposedBoard:")
+	proposedBoard:Print()
+
+	print("first possible board:")
+	tempPossibleBoards[1]:Print()
+
+	print(self.boardCount)
 
 	for i=1, self.boardCount-1 do
 		--self.possibleBoards[i]:Print()
-		if self.possibleBoards[i]:All_Positions() == proposedBoard:All_Positions() then 
-		isValid = true
-		goto continue
+		if self.possibleBoards[i]:Equals(proposedBoard) then 
+			isValid = true
+			goto continue
 		end
 	end
 
 	::continue::
 	return isValid
 end
+]]--
+
+function SolveState:ValidateWordPlacement(word, start_pos, direction)
+    local row, col = start_pos[1], start_pos[2]
+    local word_length = #word
+
+    -- Ensure the word fits within the board bounds
+    if direction == "across" then
+        if col + word_length - 1 > self.board.size then
+            print("Word extends beyond board width")
+            return false
+        end
+    else
+        if row + word_length - 1 > self.board.size then
+            print("Word extends beyond board height")
+            return false
+        end
+    end
+
+    -- Check letter placement and build the formed word
+    local formed_word = ""
+    local used_letters = {}
+    
+    for i = 1, word_length do
+        local current_pos = {row, col}
+        local existing_letter = self.board:GetTile(current_pos)
+
+        -- Ensure the placement aligns with existing letters or uses letters from the rack
+        if existing_letter == nil or existing_letter == "" then
+            if not self:contains(self.rack, word:sub(i, i)) then
+                print("Rack does not contain letter: " .. word:sub(i, i))
+                return false
+            end
+            table.insert(used_letters, word:sub(i, i)) -- Track letters taken from rack
+        elseif existing_letter ~= word:sub(i, i) then
+            print("Mismatch with existing board letter at position: " .. row .. "," .. col)
+            return false
+        end
+
+        formed_word = formed_word .. word:sub(i, i)
+
+        -- Move to the next position
+        if direction == "across" then
+            col = col + 1
+        else
+            row = row + 1
+        end
+    end
+
+    -- Check if the formed word is valid in the dictionary
+    if not self.dictionary:is_word(formed_word) then
+        print("Word is not valid in dictionary: " .. formed_word)
+        return false
+    end
+
+    -- Check if the word is connected to existing words (i.e., it is not floating)
+    local connected = false
+    for _, letter in ipairs(used_letters) do
+        local before_pos = self:before({row, col})
+        local after_pos = self:after({row, col})
+        if self.board:IsFilled(before_pos) or self.board:IsFilled(after_pos) then
+            connected = true
+        end
+    end
+
+    if not connected then
+        print("Word is not connected to existing words")
+        return false
+    end
+
+    print("Word placement is valid!")
+    return true
+end
+
 
 
 
@@ -375,19 +460,27 @@ function SolveState:run()
 
 
 	local solver = SolveState:new(trie, TempBoard, GetRandomRack())
-	print(solver.board:Print())
 	local player = SolveState:new(trie, solver.board, {"s","o","d"})
+	
+	--print("is sod valid: " .. tostring(player:ValidateWordPlacement("sod", {7,7}, "across")))
 
-	local tBoard = player.board:Take()
-	print("player board after take:")
-	player.board:Print()
-	tBoard:SetTile({7,8}, 'o')
-	tBoard:SetTile({7,9}, 'd')
-	print("player board after take:")
-	player.board:Print()
-	print("proposed board after take:")
-	tBoard:Print()
-	print(tostring(player:PlayerWordValid(tBoard)))
+
+
+
+	--print(solver.board:Print())
+	--local player = SolveState:new(trie, solver.board, {"s","o","d"})
+
+	--local tBoard = Board()
+	--tBoard = player.board:Copy()
+	--print(tostring(player.board:Equals(player.board)))
+	
+	--player.board:Print()
+	--tBoard:SetTile({7,8}, 'o')
+	--tBoard:SetTile({7,9}, 'd')
+	--print(tostring(player.board:Equals(tBoard)))
+	--print(tostring(player:PlayerWordValid(tBoard)))
+
+	--print(tostring(player:PlayerWordValid(tBoard)))
 	
 
 	
@@ -416,9 +509,9 @@ function SolveState:run()
 
 
 
-	for i=1,solver.boardCount-1 do
+	--for i=1,solver.boardCount-1 do
 		--solver.possibleBoards[i]:Print()
-	end
+	--end
 	
 
 
