@@ -1,6 +1,4 @@
-require "NewTrie"
 require "Board"
-require "Position"
 require "LetterTreeNode"
 SolveState = {}
 SolveState.__index = SolveState
@@ -165,9 +163,6 @@ function SolveState:extend_after(partial_word, current_node, next_pos, anchor_fi
     end
 
     -- If the board tile is not filled, and the current_node is a word, and anchor is filled, make the move
-	--print("Is next pos on board filled: " .. tostring(self.board:IsFilled(next_pos)))
-	--print("Is current node word: " .. tostring(current_node.is_word))
-	--print("Is Anchor filled: " .. tostring(anchor_filled))
     if not self.board:IsFilled(next_pos) and current_node.is_word and anchor_filled then
         self:legal_move(partial_word, self:before(next_pos))
     end
@@ -183,30 +178,22 @@ function SolveState:extend_after(partial_word, current_node, next_pos, anchor_fi
             end
 
             -- Ensure cross_check_results[next_pos] is a valid table
-			--cross check results is nil here!!!!!!!!!
-			--print(next_pos[1])
 			local tempPosStr = next_pos[1] .. "," .. next_pos[2]
-			--print(tostring(self.cross_check_results[tempPosStr]))
+
 
 
             if not self.cross_check_results[tempPosStr] then
                 self.cross_check_results[tempPosStr] = {} -- Initialize as empty table if nil
             end
 
-				--nextPos is for example nextpos[1] = 1, nextpos[2] = 2
 
 
             -- Check for available next letters in current_node children
             for next_letter, child_node in pairs(current_node.children) do
 				
                 -- Ensure the letter exists in rack and cross_check_results
-				--here or below
-				--print("rack contains next letter: " .. tostring(table.contains(self.rack, next_letter)))
-				--print("crossCheck results: " .. tostring(table.contains(self.cross_check_results[next_pos], next_letter)))
-				--print(tostring(self.cross_check_results[next_pos]))
                 if table.contains(self.rack, next_letter) and table.contains(self.cross_check_results[tempPosStr], next_letter) then
                     -- Remove the letter from rack and recurse
-					--print("table contains self.rack")
                     self:remove_from_rack(next_letter)
                     self:extend_after(
                         partial_word .. next_letter,
@@ -222,7 +209,6 @@ function SolveState:extend_after(partial_word, current_node, next_pos, anchor_fi
             -- If the tile is already filled, check if it matches a valid child letter
             local existing_letter = self.board:GetTile(next_pos)
             if current_node.children[existing_letter] then
-				--print("table contains existingletter")
                 self:extend_after(
                     partial_word .. existing_letter,
                     current_node.children[existing_letter],

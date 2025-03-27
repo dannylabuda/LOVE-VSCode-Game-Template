@@ -1,7 +1,5 @@
 Board = Object.extend(Object)
 
-require "Position"
-
 --this should work
 function Board:new()
 	self.size = 0
@@ -67,14 +65,10 @@ end
 
 --returns true if the tile is in bounds and has "none"
 function Board:IsEmpty(pos)
-	--print("isempty")
-	--print(pos:Print())
 	return self:InBounds(pos) and self:GetTile(pos) == "*"
 end
 
 function Board:IsFilled(pos)
-	--print("isfilled")
-	--print(pos:Print())
 	return self:InBounds(pos) and self:GetTile(pos) ~= "*"
 end
 
@@ -111,7 +105,8 @@ function Board:Equals(otherBoard)
 		for j = 1, self.size do
 			local tile1 = self:GetTile{i,j}
 			local tile2 = otherBoard:GetTile{i,j}
-			print(string.format("Comparing [%d,%d]: %s vs %s", i, j, tile1, tile2))
+			--uncomment this next line to see each individual check
+			--print(string.format("Comparing [%d,%d]: %s vs %s", i, j, tile1, tile2))
 
 			if tile1 ~= tile2 then
 				print(string.format("Mismatch at [%d,%d]: %s vs %s", i, j, tile1, tile2))
