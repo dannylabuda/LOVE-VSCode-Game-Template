@@ -78,22 +78,17 @@ function Board:IsFilled(pos)
 	return self:InBounds(pos) and self:GetTile(pos) ~= "*"
 end
 
---[[
-function Board:Take()
-	local tempBoard = Board()
-	tempBoard.size = self.size
-
-	tempBoard.tiles = {}
-	for i=1,self.size do
-		tempBoard.tiles[i] = {}
-		for j=1, self.size do
-			tempBoard.tiles[i][j] = self.tiles[i][j] -- Copy value
-		end
-	end
-	tempBoard.tiles = self.tiles
-	return tempBoard
+function Board:BoardEmpty()
+    for row = 1, self.size do
+        for col = 1, self.size do
+            if self:GetTile({row, col}) and self:GetTile({row, col}) ~= "*" then
+                return false  -- Found at least one placed tile, board isn't empty
+            end
+        end
+    end
+    return true  -- No tiles found, board is empty
 end
-]]--
+
 function Board:Equals(otherBoard)
 
 	-- Quick check: Are we comparing to the same object?
@@ -107,12 +102,15 @@ function Board:Equals(otherBoard)
 		return false
 	end
 
+	self:Print()
+	otherBoard:Print()
+
 -- Compare all tiles
 	print("Comparing tiles...")
 	for i = 1, self.size do
 		for j = 1, self.size do
-			local tile1 = self.tiles[i][j]
-			local tile2 = otherBoard.tiles[i][j]
+			local tile1 = self:GetTile{i,j}
+			local tile2 = otherBoard:GetTile{i,j}
 			print(string.format("Comparing [%d,%d]: %s vs %s", i, j, tile1, tile2))
 
 			if tile1 ~= tile2 then

@@ -165,7 +165,7 @@ function Solver:beforePart(partial_word,current_node,anchor_pos,limit)
 		for next_letter in current_node:getChildren(partial_word) do
 
 			local contains = false
-			for i=1,i<#self.rack do
+			for i=1,#self.rack do
 				if self.rack[i] == next_letter then return true end
 			end
 
