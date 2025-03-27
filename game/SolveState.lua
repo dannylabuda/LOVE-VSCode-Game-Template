@@ -353,7 +353,7 @@ function SolveState:IsProposedValid(validBoards)
 	return isValid
 end
 
-function SolveState:run()
+function SolveState:test()
 	TempBoard = Board()
 	TempBoard = TempBoard:update(13)
 	TempBoard:SetTile({7,7}, 's')
@@ -366,74 +366,20 @@ function SolveState:run()
 
 
 
+	--create new solvestate object, passing the trie and the temporary starting board, and the rack
 	local solver = SolveState:new(trie, TempBoard, {"s","o","d"})
-	--solver.board:Print()
 
+	--fill allOptions table with all possible boards
 	local allOptions = solver:find_all_options()
 
+	--create a proposed board (this would be a player's proposed play)
 	local pBoard = solver:ProposedBoard("dos",{5,7},"across")
+	--creates a player object (maybe not necessary?) and sets the board to that temp board
 	local player = SolveState:new(trie, pBoard, {"s","o","d"})
-	--pBoard:Print()
-	print(tostring(player:IsProposedValid(allOptions)))
 
+	--store if valid bool in a variable
 	local isValidWord = player:IsProposedValid(allOptions)
-	
-
-
-
-	
-	--print("is sod valid: " .. tostring(player:ValidateWordPlacement("sod", {8,6}, "down")))
-
-
-
-
-	--print(solver.board:Print())
-	--local player = SolveState:new(trie, solver.board, {"s","o","d"})
-
-	--local tBoard = Board()
-	--tBoard = player.board:Copy()
-	--print(tostring(player.board:Equals(player.board)))
-	
-	--player.board:Print()
-	--tBoard:SetTile({7,8}, 'o')
-	--tBoard:SetTile({7,9}, 'd')
-	--print(tostring(player.board:Equals(tBoard)))
-	--print(tostring(player:PlayerWordValid(tBoard)))
-
-	--print(tostring(player:PlayerWordValid(tBoard)))
-	
-
-	
-
-
-
-
-
-	--solver:AddWordToBoard(trie)
-	--solver:AddWordToBoard(trie)
-	--[[
-	--add a random word to the board, update the board
-	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Take()
-	solver.boardCount = 1
-	solver.possibleBoards = {}
-	solver.board:Print()
-	--start another iteration, add another word
-	solver = SolveState:new(basic_english(), solver.board, GetRandomRack())
-	solver = solver:find_all_options()
-	solver.board = solver.possibleBoards[love.math.random(1,solver.boardCount-1)]:Take()
-	solver.boardCount = 1
-	solver.possibleBoards = {}
-	solver.board:Print()
-	]]--
-
-
-
-
-	--for i=1,solver.boardCount-1 do
-		--solver.possibleBoards[i]:Print()
-	--end
-	
-
+	print(isValidWord)
 
 
 	return SolveState
